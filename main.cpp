@@ -15,18 +15,114 @@ Un profesor solo puede tener una clase y un estudiante solo puede estar asociado
 Los datos que se deben ver de sus alumnos son: Nombre, apellido y notas por asignatura. Los datos que se deben ver de la clase son: Número de inscritos, listado de estudiantes.
 */
 //PUNTEROS A TODO
-class Professor{
-    private:
+
+class Student {
+private:
     int id;
+    string firstName;
+    string lastName;
+    float* grades;
+    int gradeCount;
+
+public:
+    // Constructor
+    Student(string firstName, string lastName, float* Grades, int gradeCount) {
+        this->firstName = firstName;
+        this->lastName = lastName;
+        this->gradeCount = gradeCount;
+        this->grades = new float[gradeCount]; // Inicializa el array de notas
+        for (int i = 0; i < gradeCount; i++) {
+            this->grades[i] = Grades[i]; // Copia las notas proporcionadas
+        }
+    }
+
+    // Destructor
+    ~Student() {
+        delete[] grades; // Libera el array de notas
+    }
+
+    // Getters
+    string getFirstName() const {
+        return firstName;
+    }
+
+    string getLastName() const {
+        return lastName;
+    }
+
+    int getGradeCount() const {
+        return gradeCount;
+    }
+
+    // Metodo para asignar y acceder a las notas
+    void setGrade(int index, float grade) {
+        if (index >= 0 && index < gradeCount) {
+            grades[index] = grade;
+        }
+    }
+
+    // Metodo para mostrar las notas del estudiante
+    void displayGrades() const {
+        cout << "Notas de " << firstName << " " << lastName << ": ";
+        for (int i = 0; i < gradeCount; i++) {
+            cout << grades[i] << " ";
+        }
+        cout << endl;
+    }
+};
+
+class Teacher {
+private:
     string name;
-    string subject;
-    Student students[]
+    Student** students;
+    int capacity;
+    int studentCount;
 
-    public:
-    i
-}
+public:
+    // Constructor
+    Teacher(string name, int capacity) {
+        this->name = name;
+        this->students = new Student*[capacity]; // Almacén dinámico de estudiantes
+        this->capacity = capacity;
+        this->studentCount = 0;
+    }
 
-cl
+    string getName() const {
+        return name;
+    }
+    int getStudentCount() const {
+        return studentCount;
+    }
+
+
+
+    // Destructor
+    ~Teacher() {
+        for (int i = 0; i < studentCount; i++) {
+            delete students[i]; // Libera la memoria de cada estudiante
+        }
+        delete[] students; // Libera el array de estudiantes
+    }
+
+    // Metodo para agregar estudiantes
+    void addStudent(Student* student) {
+        if (studentCount < capacity) {
+            students[studentCount++] = student;
+        } else {
+            cout << "Capacidad máxima alcanzada\n";
+        }
+    }
+
+    // Metodo para listar estudiantes y sus notas
+    void listStudents() const {
+        cout << "Estudiantes de " << name << ":\n";
+        for (int i = 0; i < studentCount; i++) {
+            cout << students[i]->getFirstName() << " " << students[i]->getLastName() << endl;
+            students[i]->displayGrades(); // Muestra las notas de cada estudiante
+        }
+    }
+};
+
 
 /*
 Mochila de “material digital”.
@@ -67,7 +163,7 @@ Cuando el usuario adivine el valor, debe imprimir por pantalla el número de vec
 // De la biblioteca de C++11, usé los generadores mt19937 (Mersenne Twister) y random_device,
 // que proporcionan mejor aleatoriedad y son más seguros.
 
-using namespace std;
+
 
 // Definición de la clase "GuessTheNumber"
 class GuessTheNumber {
