@@ -59,3 +59,98 @@ Cada vez que el usuario introduce un valor, el sistema debe indicar si el valor 
 Cuando el usuario adivine el valor, debe imprimir por pantalla el número de veces que inentó adivinarlo.
 */
 
+#include <iostream>
+#include <random>    // Biblioteca para generar números aleatorios usando C++11
+// Utilicé C++11 y su biblioteca <random> para la generación de números aleatorios
+// porque al usar srand(time(0)) en C++ generaba secuencias de números predecibles.
+// La consola advirtió que el generador con la hora actual como semilla tiene poca aleatoriedad.
+// De la biblioteca de C++11, usé los generadores mt19937 (Mersenne Twister) y random_device,
+// que proporcionan mejor aleatoriedad y son más seguros.
+
+using namespace std;
+
+// Definición de la clase "GuessTheNumber"
+class GuessTheNumber {
+private:
+    int* secret_number; // Puntero para almacenar el número secreto
+    int* attempts;      // Puntero para contar el número de intentos del jugador
+
+public:
+    // Constructor de la clase
+    GuessTheNumber() {
+        // random_device: Genera aleatoriedad.
+        // Se utiliza para obtener una semilla inicial verdaderamente aleatoria.
+        // La diferencia entre srand(time(0)) y random_device es que random_device no se basa en el tiempo actual y utiliza valores del hardware para ser menos predecible.
+        random_device random;
+
+        // mt19937: Es un generador de números pseudoaleatorios basado en el algoritmo Mersenne Twister.
+        // Es mucho más eficiente y proporciona una secuencia de números pseudoaleatorios de alta calidad
+        // en comparación con el antiguo rand().
+        // Se inicializa con la semilla obtenida de random_device, lo que mejora la seguridad y aleatoriedad.
+        mt19937 gen(random());
+
+        // uniform_int_distribution: Es una distribución uniforme que asegura que cada número entero
+        // en el rango dado (en este caso de 1 a 100) tenga la misma probabilidad de ser seleccionado.
+        // A diferencia del uso directo de % con rand(), esta distribución genera números de manera más
+        // equitativa y precisa, especialmente en rangos amplios.
+        uniform_int_distribution<> dis(1, 100);
+
+        // Asigna memoria para almacenar el número secreto utilizando "new"
+        // y guarda en el puntero secret_number.
+        secret_number = new int;
+
+        // Genera un número secreto utilizando el generador Mersenne Twister y la distribución uniforme
+        // y almacena el valor resultante en la ubicación de memoria a la que apunta secret_number.
+        *secret_number = dis(gen);
+
+        // Asigna memoria para el contador de intentos, que registrará cuántos intentos ha hecho el jugador.
+        attempts = new int;
+
+        // Inicializa el contador de intentos a 0.
+        *attempts = 0;
+    }
+
+
+    // Función "play" que permite jugar. El "const" garantiza que no modifica los miembros de la clase
+    void play() const {
+        int guess; // Variable para almacenar el número que el jugador adivina
+        bool guessed = false; // Bandera para indicar si el jugador ha adivinado el número correcto utilize bool para no utilizar break en while cuando termina su trabajo
+
+        // Bucle infinito hasta que el jugador adivina el número correcto
+        while (!guessed) {
+            cout << "Enter your guess (1-100): "; // Solicita al jugador que ingrese su adivinanza
+            cin >> guess; // Captura el número ingresado por el jugador
+            (*attempts)++; // Incrementa el contador de intentos utilizando el puntero
+
+            // Si el número adivinado es menor que el número secreto
+            if (guess < *secret_number) {
+                cout << "Too low. Try again!" << endl; // Informa al jugador que su adivinanza es demasiado baja
+            }
+            // Si el número adivinado es mayor que el número secreto
+            else if (guess > *secret_number) {
+                cout << "Too high. Try again!" << endl; // Informa al jugador que su adivinanza es demasiado alta
+            }
+            // Si el jugador adivina correctamente el número secreto
+            else {
+                cout << "Congratulations! You guessed the number in " << *attempts << " attempts!" << endl; // Felicita al jugador
+                guessed = true; // Cambia la bandera a verdadero para salir del bucle
+            }
+        }
+    }
+
+    // Destructor de la clase, se llama cuando el objeto es destruido
+    ~GuessTheNumber() {
+        // Libera la memoria asignada dinámicamente para el número secreto y los intentos
+        delete secret_number;
+        delete attempts;
+    }
+};
+
+// Función principal
+int main() {
+    auto* game = new GuessTheNumber(); // Crea una instancia del juego dinámicamente
+    game->play(); // Llama a la función "play" para iniciar el juego
+    delete game; // Elimina la instancia del juego, llamando al destructor
+    return 0;
+}
+
