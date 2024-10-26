@@ -1,4 +1,4 @@
-# Install script for directory: D:/Repositorios/UNI 2024-2025/PEL/Trabajo-Grupal-2
+# Install script for directory: R:/Repositorios/Proyecto PEL 2/TC-PEL-2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,7 +34,7 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Program Files/JetBrains/CLion 2024.2.1/bin/mingw/bin/objdump.exe")
+  set(CMAKE_OBJDUMP "C:/msys64/mingw64/bin/objdump.exe")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "D:/Repositorios/UNI 2024-2025/PEL/Trabajo-Grupal-2/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "R:/Repositorios/Proyecto PEL 2/TC-PEL-2/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

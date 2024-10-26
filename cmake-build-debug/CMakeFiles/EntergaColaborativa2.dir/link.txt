@@ -1,3 +1,3 @@
-"C:\Program Files\JetBrains\CLion 2024.2.1\bin\cmake\win\x64\bin\cmake.exe" -E rm -f CMakeFiles\EntergaColaborativa2.dir/objects.a
-C:\PROGRA~1\JETBRA~1\CLION2~1.1\bin\mingw\bin\ar.exe qc CMakeFiles\EntergaColaborativa2.dir/objects.a @CMakeFiles\EntergaColaborativa2.dir\objects1.rsp
-C:\PROGRA~1\JETBRA~1\CLION2~1.1\bin\mingw\bin\G__~1.EXE -g -Wl,--whole-archive CMakeFiles\EntergaColaborativa2.dir/objects.a -Wl,--no-whole-archive -o EntergaColaborativa2.exe -Wl,--out-implib,libEntergaColaborativa2.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\EntergaColaborativa2.dir\linkLibs.rsp
+C:\Users\cochi\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe -E rm -f CMakeFiles\EntergaColaborativa2.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\EntergaColaborativa2.dir/objects.a @CMakeFiles\EntergaColaborativa2.dir\objects1.rsp
+C:\msys64\mingw64\bin\c++.exe -g -Wl,--whole-archive CMakeFiles\EntergaColaborativa2.dir/objects.a -Wl,--no-whole-archive -o EntergaColaborativa2.exe -Wl,--out-implib,libEntergaColaborativa2.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\EntergaColaborativa2.dir\linkLibs.rsp

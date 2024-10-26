@@ -1,4 +1,7 @@
 #include <iostream>
+#include <string>
+#include <fstream>
+
 using namespace std;
 
 /*
@@ -7,6 +10,137 @@ permita gestionar datos de los estudiantes. Para ello, necesitan un sistema en e
 los usuarios (estudiantes o profesores) puedan trabajar los siguientes recursos:*
 */
 
+/*
+Mochila de “material digital”.
+Rol de “Estudiante”
+El estudiante debe poder tener una mochila de “material digital”:
+Almacenará “documentos” de actividades realizadas, proyectos entregados, etc.
+Un documento, será un objeto “fichero” cargado en la mochila, que leerá del disco un fichero.txt con información del estudiante.
+El alumno podrá cargar en la mochila varios “ficheros” de datos, y podrá ver su contenido en la aplicación.
+*/
+
+// Implementación manual de un array dinámico en vez de usar la ya creada "vector"
+class DynamicArray {
+private:
+    string* data;
+    size_t size;
+    size_t capacity;
+
+    // Método para redimensionar el array cuando la capacidad está llena
+    void resize() {
+        capacity *= 2;
+        string* newData = new string[capacity];
+        for (size_t i = 0; i < size; i++) {
+            newData[i] = data[i];
+        }
+        delete[] data; // Liberamos la memoria del array anterior
+        data = newData;
+    }
+
+public:
+    // Constructor
+    DynamicArray(size_t initialCapacity = 2) : size(0), capacity(initialCapacity) {
+        data = new string[capacity];
+    }
+
+    // Destructor
+    ~DynamicArray() {
+        delete[] data;
+    }
+
+    // Método para agregar un elemento
+    void add(const string& element) {
+        if (size == capacity) {
+            resize();
+        }
+        data[size++] = element;
+    }
+
+    // Método para encontrar un elemento (retorna el índice o -1 si no se encuentra)
+    int find(const string& element) const {
+        for (size_t i = 0; i < size; i++) {
+            if (data[i] == element) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Método para eliminar un elemento por su índice
+    void removeAt(size_t index) {
+        if (index < size) {
+            for (size_t i = index; i < size - 1; i++) {
+                data[i] = data[i + 1];
+            }
+            size--;
+        }
+    }
+
+    // Método para obtener el tamaño actual
+    size_t getSize() const {
+        return size;
+    }
+
+    // Acceso a los elementos
+    string& operator[](size_t index) {
+        return data[index];
+    }
+
+    const string& operator[](size_t index) const {
+        return data[index];
+    }
+};
+
+// Clase para la mochila digital que contiene los documentos del estudiante
+class DigitalBackpack {
+private:
+    DynamicArray documents;
+
+public:
+    void addDocument(const string& filename) {
+        ifstream file(filename);
+        if (file) {
+            documents.add(filename);
+            cout << "Documento '" << filename << "' agregado exitosamente.\n";
+        } else {
+            cout << "Error: No se pudo abrir el archivo " << filename << ".\n";
+        }
+        file.close();
+    }
+
+    void removeDocument(const string& filename) {
+        int index = documents.find(filename);
+        if (index != -1) {
+            documents.removeAt(index);
+            cout << "Documento '" << filename << "' eliminado correctamente.\n";
+        } else {
+            cout << "Error: El documento '" << filename << "' no se encuentra en la mochila.\n";
+        }
+    }
+
+    void viewDocuments() const {
+        if (documents.getSize() == 0) {
+            cout << "La mochila está vacía.\n";
+            return;
+        }
+
+        cout << "Documentos en la mochila:\n";
+        for (size_t i = 0; i < documents.getSize(); i++) {
+            cout << "Contenido del archivo '" << documents[i] << "':\n";
+            ifstream file(documents[i]);
+            if (!file) {
+                cout << "No se pudo abrir el archivo " << documents[i] << endl;
+                continue;
+            }
+            string line;
+            while (getline(file, line)) {
+                cout << line << endl;
+            }
+            cout << "--------------------------\n";
+            file.close();
+        }
+    }
+};
 
 /*
 Gestionar a los estudiantes de cada aula:
@@ -22,6 +156,7 @@ private:
     string lastName;
     float* grades;
     int gradeCount;
+    DigitalBackpack* backpack; // Mochila digital del estudiante
 
 public:
     // Constructor
@@ -33,11 +168,13 @@ public:
         for (int i = 0; i < gradeCount; i++) {
             this->grades[i] = Grades[i]; // Copia las notas proporcionadas
         }
+        backpack = new DigitalBackpack(); // Inicializamos la mochila
     }
 
     // Destructor
     ~Student() {
         delete[] grades; // Libera el array de notas
+        delete backpack;
     }
 
     // Getters
@@ -59,6 +196,9 @@ public:
             grades[index] = grade;
         }
     }
+
+    // Método para gestionar la mochila digital del estudiante
+    DigitalBackpack* getBackpack() const { return backpack; }
 
     // Metodo para mostrar las notas del estudiante
     void displayGrades() const {
@@ -121,16 +261,6 @@ public:
         }
     }
 };
-
-
-/*
-Mochila de “material digital”.
-Rol de “Estudiante”
-El estudiante debe poder tener una mochila de “material digital”:
-Almacenará “documentos” de actividades realizadas, proyectos entregados, etc.
-Un documento, será un objeto “fichero” cargado en la mochila, que leerá del disco un fichero.txt con información del estudiante.
-El alumno podrá cargar en la mochila varios “ficheros” de datos, y podrá ver su contenido en la aplicación.
-*/
 
 /*
 Calculadora avanzada:
@@ -469,8 +599,70 @@ void manageStudentsAndTeachers() {
     //poner aqui funcionalidades
 }
 
-void digitalMaterialBackpack() {
-    //poner aqui funcionalidades
+// Función para crear un nuevo archivo de documento
+void createDocument() {
+    string filename;
+    cout << "Ingrese el nombre del nuevo archivo (con .txt): ";
+    cin >> filename;
+
+    ofstream file(filename);
+    if (!file) {
+        cout << "Error al crear el archivo " << filename << ".\n";
+        return;
+    }
+
+    cout << "Ingrese el contenido del archivo (escriba 'FIN' en una línea nueva para terminar):\n";
+    string line;
+    cin.ignore(); // Ignorar el salto de línea previo
+    while (true) {
+        getline(cin, line);
+        if (line == "FIN") break;
+        file << line << endl;
+    }
+    file.close();
+    cout << "Archivo '" << filename << "' creado exitosamente.\n";
+}
+
+// Menú para la mochila de un estudiante específico
+void studentBackpackMenu(Student* student) {
+    int option;
+    string filename;
+    DigitalBackpack* backpack = student->getBackpack();
+
+    while (true) {
+        cout << "\n--- MENÚ DE MOCHILA DIGITAL PARA " << student->getFirstName() << " ---\n";
+        cout << "1. Crear un nuevo documento\n";
+        cout << "2. Añadir documento existente a la mochila\n";
+        cout << "3. Eliminar documento de la mochila\n";
+        cout << "4. Ver documentos en la mochila\n";
+        cout << "0. Volver\n";
+        cout << "Elija una opción: ";
+        cin >> option;
+
+        switch (option) {
+        case 1:
+            createDocument();
+            break;
+        case 2:
+            cout << "Ingrese el nombre del archivo a agregar: ";
+            cin >> filename;
+            backpack->addDocument(filename);
+            break;
+        case 3:
+            cout << "Ingrese el nombre del archivo a eliminar: ";
+            cin >> filename;
+            backpack->removeDocument(filename);
+            break;
+        case 4:
+            backpack->viewDocuments();
+            break;
+        case 0:
+            cout << "Volviendo...\n";
+            return;
+        default:
+            cout << "Opción no válida. Intente nuevamente.\n";
+        }
+    }
 }
 
 void userManagementSystem() {
@@ -482,6 +674,10 @@ void userManagementSystem() {
 int main() {
     AdvancedCalculator* calculator = new AdvancedCalculator();
 
+    // Estudiante ejemplo
+    float grades[] = {85.5, 90.0, 78.3};
+    Student* student = new Student("Juan", "Perez", grades, 3);
+
     int choice;
     while (true) {
         showMainMenu();
@@ -492,7 +688,8 @@ int main() {
             manageStudentsAndTeachers();
             break;
         case 2:
-            digitalMaterialBackpack();
+            studentBackpackMenu(student);
+            delete student; // Limpiamos la memoria
             break;
         case 3:
             calculatorMenu(calculator);
