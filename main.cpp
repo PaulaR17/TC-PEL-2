@@ -18,7 +18,6 @@ Los datos que se deben ver de sus alumnos son: Nombre, apellido y notas por asig
 
 class Student {
 private:
-    int id;
     string firstName;
     string lastName;
     float* grades;
