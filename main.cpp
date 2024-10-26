@@ -393,26 +393,45 @@ public:
     // Función "play" que permite jugar. El "const" garantiza que no modifica los miembros de la clase
     void play() const {
         int guess; // Variable para almacenar el número que el jugador adivina
-        bool guessed = false; // Bandera para indicar si el jugador ha adivinado el número correcto utilize bool para no utilizar break en while cuando termina su trabajo
+        bool guessed = false; // Bandera para indicar si el jugador ha adivinado el número correcto, utiliza bool para no utilizar break en while cuando termina su trabajo
 
         // Bucle infinito hasta que el jugador adivina el número correcto
         while (!guessed) {
-            cout << "Enter your guess (1-100): "; // Solicita al jugador que ingrese su adivinanza
-            cin >> guess; // Captura el número ingresado por el jugador
-            (*attempts)++; // Incrementa el contador de intentos utilizando el puntero
+            cout << "Introduce tu adivinanza (1-100): "; // Solicita al jugador que ingrese su adivinanza
+            try {
+                if (!(cin >> guess)) { // Verifica que la entrada sea un número
+                    throw invalid_argument("Entrada no válida. Por favor, introduce un número (1-100): ");
+                }
+                (*attempts)++; // Incrementa el contador de intentos utilizando el puntero
 
-            // Si el número adivinado es menor que el número secreto
-            if (guess < *secret_number) {
-                cout << "Too low. Try again!" << endl; // Informa al jugador que su adivinanza es demasiado baja
-            }
-            // Si el número adivinado es mayor que el número secreto
-            else if (guess > *secret_number) {
-                cout << "Too high. Try again!" << endl; // Informa al jugador que su adivinanza es demasiado alta
-            }
-            // Si el jugador adivina correctamente el número secreto
-            else {
-                cout << "Congratulations! You guessed the number in " << *attempts << " attempts!" << endl; // Felicita al jugador
-                guessed = true; // Cambia la bandera a verdadero para salir del bucle
+                // Calcula la diferencia entre la adivinanza y el número secreto
+                int difference = abs(guess - *secret_number);
+
+                // Si el número adivinado es menor que el número secreto
+                if (guess < *secret_number) {
+                    if (difference > 10) {
+                        cout << "Demasiado bajo. ¡Intentalo de nuevo!" << endl; // Informa al jugador que su adivinanza es demasiado baja
+                    } else {
+                        cout << "Bajo. ¡Intentalo de nuevo!" << endl; // Informa al jugador que su adivinanza es baja
+                    }
+                }
+                // Si el número adivinado es mayor que el número secreto
+                else if (guess > *secret_number) {
+                    if (difference > 10) {
+                        cout << "Demasiado alto. ¡Intentalo de nuevo!" << endl; // Informa al jugador que su adivinanza es demasiado alta
+                    } else {
+                        cout << "Alto. ¡Intentalo de nuevo!" << endl; // Informa al jugador que su adivinanza es alta
+                    }
+                }
+                // Si el jugador adivina correctamente el número secreto
+                else {
+                    cout << "¡Felicidades! Adivinaste el numero en " << *attempts << " intentos!" << endl; // Felicita al jugador
+                    guessed = true; // Cambia la bandera a verdadero para salir del bucle
+                }
+            } catch (invalid_argument& e) {
+                cin.clear(); // Limpia el estado de error de cin
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignora la entrada no válida
+                cout << e.what(); // Muestra el mensaje de error
             }
         }
     }
@@ -423,8 +442,8 @@ public:
         delete secret_number;
         delete attempts;
     }
-
 };
+
 
 void playGuessTheNumber() {
     auto* game = new GuessTheNumber(); // Crea una instancia del juego
