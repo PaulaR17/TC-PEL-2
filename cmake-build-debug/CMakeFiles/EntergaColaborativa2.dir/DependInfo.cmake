@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/mateo/Documents/Clases/PEL/TC-PEL-2/main.cpp" "CMakeFiles/EntergaColaborativa2.dir/main.cpp.obj" "gcc" "CMakeFiles/EntergaColaborativa2.dir/main.cpp.obj.d"
+  "D:/Repositorios/UNI 2024-2025/PEL/Trabajo-Grupal-2/main.cpp" "CMakeFiles/EntergaColaborativa2.dir/main.cpp.obj" "gcc" "CMakeFiles/EntergaColaborativa2.dir/main.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

@@ -137,7 +137,94 @@ El alumno podrá cargar en la mochila varios “ficheros” de datos, y podrá v
 Calculadora avanzada:
 Se debe incluir una funcionalidad de calculadora, que aparte de realizar operaciones básicas, también debe poder operar con matrices de n elementos, pudiendo ser las operaciones de suma, resta, multiplicación y división, calcular la matriz traspuesta a la dada, y, en caso de ser una matriz cuadrática, obtener su determinante.
 */
+class AdvancedCalculator
+{
+public:
+    AdvancedCalculator() {}
 
+    int add(int a, int b)
+    {
+        return a + b;
+    }
+
+    int substract(int a, int b)
+    {
+        return a - b;
+    }
+
+    int multiply(int a, int b)
+    {
+        return a * b;
+    }
+    float divide(int a, int b)
+    {
+        if (b == 0)
+        {
+            cout << "No se puede dividir por 0\n"<<endl;
+            return 0;
+        }
+        return (float)a/b;
+    }
+
+    void fillMatrix(int* mat, int rows, int cols)
+    {
+        cout << "Escriba los elementos de la matriz (" << rows << "x" << cols << "):" << endl;
+        for (int i = 0; i < rows*cols; i++)
+        {
+            cin >> mat[i];
+        }
+    }
+
+    void displayMatrix(int* mat, int rows, int cols) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                cout << mat[i * cols + j] << " ";
+            }
+            cout << endl;
+        }
+    }
+
+    bool addMatrices(int* mat1, int* mat2, int* result, int rows1, int cols1, int rows2, int cols2) {
+        if (rows1 != rows2 || cols1 != cols2) {
+            cout << "ERROR: Para sumarse las matrices deben tener las mismas dimensiones." << endl;
+            return false;
+        }
+        for (int i = 0; i < rows1 * cols1; i++) {
+            result[i] = mat1[i] + mat2[i];
+        }
+        return true;
+    }
+    bool subtractMatrices(int* mat1, int* mat2, int* result, int rows1, int cols1, int rows2, int cols2) {
+        if (rows1 != rows2 || cols1 != cols2) {
+            cout << "ERROR: Para restarse las matrices deben tener las mismas dimensiones." << endl;
+            return false;
+        }
+        for (int i = 0; i < rows1 * cols1; i++) {
+            result[i] = mat1[i] - mat2[i];
+        }
+        return true;
+    }
+
+    bool multiplyMatrices(int* mat1, int* mat2, int* result, int rows1, int cols1, int rows2, int cols2) {
+        if (cols1 != rows2) {
+            cout << "ERROR: Para que se  multipliquen el número de columnas de la primera matriz debe ser igual al número de filas de la segunda." << endl;
+            return false;
+        }
+        for (int i = 0; i < rows1; i++) {
+            for (int j = 0; j < cols2; j++) {
+                result[i * cols2 + j] = 0;
+                for (int k = 0; k < cols1; k++) {
+                    result[i * cols2 + j] += mat1[i * cols1 + k] * mat2[k * cols2 + j];
+                }
+            }
+        }
+        return true;
+    }
+
+
+    ~AdvancedCalculator() {}
+
+};
 /*
 Sistema de altas y bajas de usuarios.
 “Administrador”.
@@ -240,13 +327,31 @@ public:
         delete secret_number;
         delete attempts;
     }
+
+    void playGuessTheNumber() {
+        auto* game = new GuessTheNumber(); // Crea una instancia del juego
+        game->play(); // Llama a la función "play" para iniciar el juego
+        delete game; // Libera la memoria
+    }
+
+
+    void showMainMenu()
+    {
+        cout<<"\n---MENU PRINCIPAL---\n";
+        cout << "Seleccione una opción: ";
+        cout<<"1. Gestion de Estudiantes y Professores\n";
+        cout << "2. Mochila de Material Digital\n";
+        cout << "3. Calculadora Avanzada\n";
+        cout << "4. Sistema de Altas y Bajas de Usuarios\n";
+        cout << "5. Juego de Adivinanza\n";
+        cout << "6. Salir\n";
+
+    }
 };
 
 // Función principal
 int main() {
-    auto* game = new GuessTheNumber(); // Crea una instancia del juego dinámicamente
-    game->play(); // Llama a la función "play" para iniciar el juego
-    delete game; // Elimina la instancia del juego, llamando al destructor
+
     return 0;
 }
 
