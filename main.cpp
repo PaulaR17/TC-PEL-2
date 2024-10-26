@@ -224,6 +224,103 @@ public:
     ~AdvancedCalculator() {}
 
 };
+
+void basicOperationsMenu(AdvancedCalculator* calculator) {
+    int num1, num2, op;
+    cout << "Ingrese dos números: ";
+    cin >> num1 >> num2;
+    cout << "Seleccione la operación: 1) Suma 2) Resta 3) Multiplicación 4) División" << endl;
+    cin >> op;
+
+    switch(op) {
+    case 1: cout << "Resultado: " << calculator->add(num1, num2) << endl; break;
+    case 2: cout << "Resultado: " << calculator->substract(num1, num2) << endl; break;
+    case 3: cout << "Resultado: " << calculator->multiply(num1, num2) << endl; break;
+    case 4: cout << "Resultado: " << calculator->divide(num1, num2) << endl; break;
+    default: cout << "Operación no válida." << endl;
+    }
+}
+void matrixOperationsMenu(AdvancedCalculator* calculator) {
+    int rows, cols, rows2, cols2;
+    cout << "Ingrese el número de filas y columnas de la primera matriz: ";
+    cin >> rows >> cols;
+    int* mat1 = new int[rows * cols];
+    calculator->fillMatrix(mat1, rows, cols);
+
+    cout << "Ingrese el número de filas y columnas de la segunda matriz: ";
+    cin >> rows2 >> cols2;
+    int* mat2 = new int[rows2 * cols2];
+    calculator->fillMatrix(mat2, rows2, cols2);
+
+    int matrixOp;
+    cout << "Seleccione la operación de matrices: 1) Suma 2) Resta 3) Multiplicación" << endl;
+    cin >> matrixOp;
+
+    int* result = new int[rows * cols];  // Tamaño ajustado según la operación
+
+    if (matrixOp == 1) {  // Suma
+        if (rows == rows2 && cols == cols2) {
+            if (calculator->addMatrices(mat1, mat2, result, rows, cols, rows2, cols2)) {
+                cout << "Resultado:" << endl;
+                calculator->displayMatrix(result, rows, cols);
+            }
+        } else {
+            cout << "ERROR: Las matrices deben tener las mismas dimensiones." << endl;
+        }
+    }
+    else if (matrixOp == 2) {  // Resta
+        if (rows == rows2 && cols == cols2) {
+            if (calculator->subtractMatrices(mat1, mat2, result, rows, cols, rows2, cols2)) {
+                cout << "Resultado:" << endl;
+                calculator->displayMatrix(result, rows, cols);
+            }
+        } else {
+            cout << "ERROR: Las matrices deben tener las mismas dimensiones." << endl;
+        }
+    }
+    else if (matrixOp == 3) {  // Multiplicación
+        if (cols == rows2) {
+            int* resultMult = new int[rows * cols2];
+            if (calculator->multiplyMatrices(mat1, mat2, resultMult, rows, cols, rows2, cols2)) {
+                cout << "Resultado:" << endl;
+                calculator->displayMatrix(resultMult, rows, cols2);
+            }
+            delete[] resultMult;
+        } else {
+            cout << "ERROR: para multiplicarlas El número de columnas de la primera matriz debe ser igual al número de filas de la segunda." << endl;
+        }
+    }
+    else {
+        cout << "Operación de matrices no válida." << endl;
+    }
+    //liberamos memoria...
+    delete[] mat1;
+    delete[] mat2;
+    delete[] result;
+}
+
+void calculatorMenu(AdvancedCalculator* calculator) {
+    int operation;
+    while (true) {
+        cout << "\n--- MENÚ CALCULADORA ---\n";
+        cout << "1. Operaciones básicas\n";
+        cout << "2. Operaciones con matrices\n";
+        cout << "0. Volver al Menú Principal\n";
+        cout << "Elija una opción: ";
+        cin >> operation;
+
+        if (operation == 1) {
+            basicOperationsMenu(calculator);
+        } else if (operation == 2) {
+            matrixOperationsMenu(calculator);
+        } else if (operation == 0) {
+            cout << "Volviendo al menú principal..." << endl;
+            break;
+        } else {
+            cout << "Operación no válida, vuelva a intentarlo." << endl;
+        }
+    }
+}
 /*
 Sistema de altas y bajas de usuarios.
 “Administrador”.
@@ -327,30 +424,73 @@ public:
         delete attempts;
     }
 
-    void playGuessTheNumber() {
-        auto* game = new GuessTheNumber(); // Crea una instancia del juego
-        game->play(); // Llama a la función "play" para iniciar el juego
-        delete game; // Libera la memoria
-    }
-
-
-    void showMainMenu()
-    {
-        cout<<"\n---MENU PRINCIPAL---\n";
-        cout << "Seleccione una opción: ";
-        cout<<"1. Gestion de Estudiantes y Professores\n";
-        cout << "2. Mochila de Material Digital\n";
-        cout << "3. Calculadora Avanzada\n";
-        cout << "4. Sistema de Altas y Bajas de Usuarios\n";
-        cout << "5. Juego de Adivinanza\n";
-        cout << "6. Salir\n";
-
-    }
 };
+
+void playGuessTheNumber() {
+    auto* game = new GuessTheNumber(); // Crea una instancia del juego
+    game->play(); // Llama a la función "play" para iniciar el juego
+    delete game; // Libera la memoria
+}
+
+void showMainMenu()
+{
+    cout<<"\n---MENU PRINCIPAL---\n";
+    cout << "Seleccione una opción:\n ";
+    cout<<"1. Gestion de Estudiantes y Professores\n";
+    cout << "2. Mochila de Material Digital\n";
+    cout << "3. Calculadora Avanzada\n";
+    cout << "4. Sistema de Altas y Bajas de Usuarios\n";
+    cout << "5. Juego de Adivinanza\n";
+    cout << "6. Salir\n";
+
+
+}
+
+void manageStudentsAndTeachers() {
+    //poner aqui funcionalidades
+}
+
+void digitalMaterialBackpack() {
+    //poner aqui funcionalidades
+}
+
+void userManagementSystem() {
+    //poner aqui funcionalidades
+}
+
 
 // Función principal
 int main() {
+    AdvancedCalculator* calculator = new AdvancedCalculator();
 
-    return 0;
+    int choice;
+    while (true) {
+        showMainMenu();
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            manageStudentsAndTeachers();
+            break;
+        case 2:
+            digitalMaterialBackpack();
+            break;
+        case 3:
+            calculatorMenu(calculator);
+            break;
+        case 4:
+            userManagementSystem();
+            break;
+        case 5:
+            playGuessTheNumber();
+            break;
+        case 6:
+            cout << "Saliendo del programa." << endl;
+            delete calculator;  //liberamos lamemoria del objeto calculator
+            return 0;
+        default:
+            cout << "Opción no válida. Intente nuevamente." << endl;
+        }
+    }
 }
 
