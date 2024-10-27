@@ -152,6 +152,7 @@ Los datos que se deben ver de sus alumnos son: Nombre, apellido y notas por asig
 
 class Student {
 private:
+    int id;
     string firstName;
     string lastName;
     float* grades;
@@ -160,7 +161,8 @@ private:
 
 public:
     // Constructor
-    Student(string firstName, string lastName, float* Grades, int gradeCount) {
+    Student(int id, string firstName, string lastName, float* Grades, int gradeCount) {
+        this->id = id;
         this->firstName = firstName;
         this->lastName = lastName;
         this->gradeCount = gradeCount;
@@ -260,6 +262,8 @@ public:
             students[i]->displayGrades(); // Muestra las notas de cada estudiante
         }
     }
+
+    
 };
 
 /*
