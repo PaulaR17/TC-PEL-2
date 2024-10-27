@@ -739,26 +739,51 @@ void userManagementSystem(DynamicArray<User*>& users, Admin& admin) {
     while (true) {
         cout << "\n--- SISTEMA DE GESTIÓN DE USUARIOS ---\n";
         cout << "1. Añadir usuario\n2. Eliminar usuario\n3. Mostrar usuarios\n0. Volver\n";
+        cout << "Seleccione una opción: ";
         cin >> option;
 
         if (option == 0) break;
-        if (option == 1) {
+
+        if (option == 1) {  // Añadir usuario
             int role, id = users.getSize() + 1;
             string name, surname;
-            cout << "1. Estudiante\n2. Profesor\nSeleccione el rol: ";
-            cin >> role >> name >> surname;
 
-            if (role == 1) users.add(new Student(id, name, surname));
-            else if (role == 2) users.add(new Teacher(id, name, surname));
-            else cout << "Rol inválido.\n";
+            cout << "Seleccione el rol:\n1. Estudiante\n2. Profesor\n";
+            cout << "Ingrese el número correspondiente al rol: ";
+            cin >> role;
 
-        } else if (option == 2) {
+            // Validar el rol seleccionado
+            if (role != 1 && role != 2) {
+                cout << "Rol inválido. Intente nuevamente.\n";
+                continue;
+            }
+
+            cout << "Ingrese el nombre: ";
+            cin >> name;
+
+            cout << "Ingrese el apellido: ";
+            cin >> surname;
+
+            // Crear el usuario en función del rol
+            if (role == 1) {
+                users.add(new Student(id, name, surname));
+                cout << "Estudiante añadido exitosamente.\n";
+            } else if (role == 2) {
+                users.add(new Teacher(id, name, surname));
+                cout << "Profesor añadido exitosamente.\n";
+            }
+
+        } else if (option == 2) {  // Eliminar usuario
             int id;
             cout << "ID del usuario a eliminar: ";
             cin >> id;
             admin.removeUser(id, users);
-        } else if (option == 3) {
-            for (size_t i = 0; i < users.getSize(); i++) users[i]->showInfo();
+
+        } else if (option == 3) {  // Mostrar usuarios
+            cout << "\n--- LISTA DE USUARIOS ---\n";
+            for (size_t i = 0; i < users.getSize(); i++) {
+                users[i]->showInfo();
+            }
         } else {
             cout << "Opción no válida. Intente nuevamente.\n";
         }
