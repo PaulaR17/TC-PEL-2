@@ -263,7 +263,7 @@ public:
         }
     }
 
-    
+
 };
 
 /*
@@ -600,7 +600,61 @@ void showMainMenu()
 }
 
 void manageStudentsAndTeachers() {
-    //poner aqui funcionalidades
+     // Crear un profesor con capacidad máxima de 5 estudiantes (puedes cambiar el valor si es necesario)
+    Teacher teacher("Profesor Ejemplo", 5);
+    int option;
+
+    while (true) {
+        cout << "\n--- GESTIÓN DE ESTUDIANTES Y PROFESORES ---\n";
+        cout << "1. Añadir estudiante\n";
+        cout << "2. Listar estudiantes\n";
+        cout << "3. Ver número de inscritos\n";
+        cout << "0. Volver al Menú Principal\n";
+        cout << "Seleccione una opción: ";
+        cin >> option;
+
+        if (option == 1) {
+            int id;
+            string firstName, lastName;
+            int gradeCount;
+
+            cout << "Ingrese el ID del estudiante: ";
+            cin >> id;
+            cout << "Ingrese el nombre del estudiante: ";
+            cin >> firstName;
+            cout << "Ingrese el apellido del estudiante: ";
+            cin >> lastName;
+            cout << "Ingrese la cantidad de notas: ";
+            cin >> gradeCount;
+
+            float* grades = new float[gradeCount];
+            cout << "Ingrese las notas:\n";
+            for (int i = 0; i < gradeCount; i++) {
+                cout << "Nota " << (i + 1) << ": ";
+                cin >> grades[i];
+            }
+
+            // Crear el nuevo estudiante
+            Student* student = new Student(id, firstName, lastName, grades, gradeCount);
+            teacher.addStudent(student); // Agregar el estudiante al profesor
+
+            delete[] grades; // Limpiar la memoria de las notas temporalmente usadas
+            cout << "Estudiante añadido exitosamente.\n";
+
+        } else if (option == 2) {
+            teacher.listStudents(); // Lista los estudiantes y sus notas
+
+        } else if (option == 3) {
+            cout << "Número de inscritos: " << teacher.getStudentCount() << endl; // Muestra la cantidad de estudiantes asignados
+
+        } else if (option == 0) {
+            cout << "Volviendo al menú principal...\n";
+            break;
+
+        } else {
+            cout << "Opción no válida. Intente nuevamente.\n";
+        }
+    }
 }
 
 // Función para crear un nuevo archivo de documento
@@ -680,7 +734,7 @@ int main() {
 
     // Estudiante ejemplo
     float grades[] = {85.5, 90.0, 78.3};
-    Student* student = new Student("Juan", "Perez", grades, 3);
+    Student* student = new Student(1,"Juan", "Perez", grades, 3);
 
     int choice;
     while (true) {
