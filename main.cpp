@@ -185,7 +185,7 @@ public:
     }
 
     void showGrades() const {
-        cout << "Grades for " << name << " " << surname << ": ";
+        cout << "Notas de " << name << " " << surname << ": ";
         for (size_t i = 0; i < grades.getSize(); i++) {
             cout << grades[i] << " ";
         }
@@ -590,10 +590,7 @@ void showMainMenu()
 
 
 }
-
-void manageStudentsAndTeachers() {
-     // Crear un profesor con capacidad máxima de 5 estudiantes (puedes cambiar el valor si es necesario)
-    Teacher teacher(1,"Profesor","Ejemplo", 5);
+void manageStudentsAndTeachers(Teacher& teacher, DynamicArray<User*>& users) {
     int option;
 
     while (true) {
@@ -606,18 +603,33 @@ void manageStudentsAndTeachers() {
         cin >> option;
 
         if (option == 1) {
-            int id;
+            int id = users.getSize() ; // Generar un ID único basado en el tamaño de la lista
             string firstName, lastName;
             int gradeCount;
 
-            cout << "Ingrese el ID del estudiante: ";
-            cin >> id;
             cout << "Ingrese el nombre del estudiante: ";
             cin >> firstName;
             cout << "Ingrese el apellido del estudiante: ";
             cin >> lastName;
-            cout << "Ingrese la cantidad de notas: ";
-            cin >> gradeCount;
+
+            // Validación de la entrada para la cantidad de notas
+            while (true) {
+                cout << "Ingrese la cantidad de notas: ";
+                try {
+                    cin >> gradeCount;
+                    if (cin.fail()) {
+                        throw invalid_argument("Debe ingresar un número entero para la cantidad de notas.");
+                    }
+                    if (gradeCount < 0) {
+                        throw invalid_argument("La cantidad de notas no puede ser negativa.");
+                    }
+                    break;
+                } catch (const invalid_argument& e) {
+                    cout << e.what() << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
 
             float* grades = new float[gradeCount];
             cout << "Ingrese las notas:\n";
@@ -626,11 +638,12 @@ void manageStudentsAndTeachers() {
                 cin >> grades[i];
             }
 
-            // Crear el nuevo estudiante
-            Student* student = new Student(id, firstName, lastName, grades, gradeCount);
-            teacher.addStudent(student); // Agregar el estudiante al profesor
+            // Crear el nuevo estudiante y agregarlo al sistema compartido
+            Student* newStudent = new Student(id, firstName, lastName, grades, gradeCount);
+            teacher.addStudent(newStudent);  // Añadir el estudiante al profesor
+            users.add(newStudent);           // Añadir el estudiante a la lista compartida
 
-            delete[] grades; // Limpiar la memoria de las notas temporalmente usadas
+            delete[] grades; // Liberar la memoria temporal de notas
             cout << "Estudiante añadido exitosamente.\n";
 
         } else if (option == 2) {
@@ -734,8 +747,10 @@ void studentBackpackMenu(Student* student) {
     }
 }
 void userManagementSystem(DynamicArray<User*>& users, Admin& admin) {
-    int option;
+    DynamicArray<int> freeIds;  // Array para almacenar IDs disponibles
+    int nextId = 3; // Empezar el siguiente ID después de los usuarios iniciales
 
+    int option;
     while (true) {
         cout << "\n--- SISTEMA DE GESTIÓN DE USUARIOS ---\n";
         cout << "1. Añadir usuario\n2. Eliminar usuario\n3. Mostrar usuarios\n0. Volver\n";
@@ -745,14 +760,13 @@ void userManagementSystem(DynamicArray<User*>& users, Admin& admin) {
         if (option == 0) break;
 
         if (option == 1) {  // Añadir usuario
-            int role, id = users.getSize() + 1;
+            int role;
             string name, surname;
 
             cout << "Seleccione el rol:\n1. Estudiante\n2. Profesor\n";
             cout << "Ingrese el número correspondiente al rol: ";
             cin >> role;
 
-            // Validar el rol seleccionado
             if (role != 1 && role != 2) {
                 cout << "Rol inválido. Intente nuevamente.\n";
                 continue;
@@ -760,44 +774,85 @@ void userManagementSystem(DynamicArray<User*>& users, Admin& admin) {
 
             cout << "Ingrese el nombre: ";
             cin >> name;
-
             cout << "Ingrese el apellido: ";
             cin >> surname;
 
-            // Crear el usuario en función del rol
+            int id;
+            if (freeIds.getSize() > 0) { // Reutilizar un ID disponible si existe alguno
+                id = freeIds[freeIds.getSize() - 1];
+                freeIds.removeAt(freeIds.getSize() - 1); // Quitar el último ID disponible
+            } else { // Si no hay IDs disponibles, usar el siguiente ID nuevo
+                id = nextId++;
+            }
+
+            User* newUser = nullptr;
             if (role == 1) {
-                users.add(new Student(id, name, surname));
-                cout << "Estudiante añadido exitosamente.\n";
+                newUser = new Student(id, name, surname);
+                cout << "Estudiante añadido exitosamente con ID: " << id << "\n";
             } else if (role == 2) {
-                users.add(new Teacher(id, name, surname));
-                cout << "Profesor añadido exitosamente.\n";
+                newUser = new Teacher(id, name, surname);
+                cout << "Profesor añadido exitosamente con ID: " << id << "\n";
+            }
+
+            // Añadir el nuevo usuario en la primera posición disponible o al final
+            bool added = false;
+            for (size_t i = 0; i < users.getSize(); i++) {
+                if (users[i] == nullptr) {  // Reutilizar una posición vacía
+                    users[i] = newUser;
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {  // Si no hay posiciones vacías, añadir al final
+                users.add(newUser);
             }
 
         } else if (option == 2) {  // Eliminar usuario
             int id;
             cout << "ID del usuario a eliminar: ";
             cin >> id;
-            admin.removeUser(id, users);
+
+            bool found = false;
+            for (size_t i = 0; i < users.getSize(); i++) {
+                if (users[i] && users[i]->getId() == id) {
+                    delete users[i];  // Llama al destructor del usuario
+                    users[i] = nullptr; // Marcar la posición como vacía
+                    freeIds.add(id);    // Añadir el ID eliminado a la lista de IDs disponibles
+                    cout << "Usuario con ID " << id << " eliminado.\n";
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                cout << "Usuario con ID " << id << " no encontrado.\n";
+            }
 
         } else if (option == 3) {  // Mostrar usuarios
             cout << "\n--- LISTA DE USUARIOS ---\n";
             for (size_t i = 0; i < users.getSize(); i++) {
-                users[i]->showInfo();
+                if (users[i]) {
+                    users[i]->showInfo();
+                }
             }
         } else {
             cout << "Opción no válida. Intente nuevamente.\n";
         }
     }
 }
-
 // ---- Función Principal Unificada ----
 int main() {
     AdvancedCalculator* calculator = new AdvancedCalculator();
-    Admin admin(1, "Admin", "Principal");
+
     DynamicArray<User*> users;
-    users.add(&admin);
+
+    Admin admin(0, "Admin", "Principal");
+    users.add(&admin);  // Añadir el administrador a la lista compartida
+
+    Teacher teacher(1, "Profesor", "Ejemplo", 5); // Profesor inicial
+    users.add(&teacher); // Agregar el profesor a la lista compartida
 
     Student student(2, "Juan", "Perez");
+    users.add(&student);
     int choice;
 
     while (true) {
@@ -806,7 +861,7 @@ int main() {
 
         switch (choice) {
             case 1:
-                manageStudentsAndTeachers();
+                manageStudentsAndTeachers(teacher,users);
             break;
             case 2:
                 studentBackpackMenu(&student);
