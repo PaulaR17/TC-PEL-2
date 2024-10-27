@@ -20,44 +20,42 @@ El alumno podrá cargar en la mochila varios “ficheros” de datos, y podrá v
 */
 
 // Implementación manual de un array dinámico en vez de usar la ya creada "vector"
+
+
+template<typename T>
 class DynamicArray {
 private:
-    string* data;
+    T* data;
     size_t size;
     size_t capacity;
 
-    // Método para redimensionar el array cuando la capacidad está llena
     void resize() {
         capacity *= 2;
-        string* newData = new string[capacity];
+        T* newData = new T[capacity];
         for (size_t i = 0; i < size; i++) {
             newData[i] = data[i];
         }
-        delete[] data; // Liberamos la memoria del array anterior
+        delete[] data;
         data = newData;
     }
 
 public:
-    // Constructor
     DynamicArray(size_t initialCapacity = 2) : size(0), capacity(initialCapacity) {
-        data = new string[capacity];
+        data = new T[capacity];
     }
 
-    // Destructor
     ~DynamicArray() {
         delete[] data;
     }
 
-    // Método para agregar un elemento
-    void add(const string& element) {
+    void add(const T& element) {
         if (size == capacity) {
             resize();
         }
         data[size++] = element;
     }
 
-    // Método para encontrar un elemento (retorna el índice o -1 si no se encuentra)
-    int find(const string& element) const {
+    int find(const T& element) const {
         for (size_t i = 0; i < size; i++) {
             if (data[i] == element) {
                 return i;
@@ -66,7 +64,6 @@ public:
         return -1;
     }
 
-    // Método para eliminar un elemento por su índice
     void removeAt(size_t index) {
         if (index < size) {
             for (size_t i = index; i < size - 1; i++) {
@@ -76,25 +73,24 @@ public:
         }
     }
 
-    // Método para obtener el tamaño actual
     size_t getSize() const {
         return size;
     }
 
-    // Acceso a los elementos
-    string& operator[](size_t index) {
+    T& operator[](size_t index) {
         return data[index];
     }
 
-    const string& operator[](size_t index) const {
+    const T& operator[](size_t index) const {
         return data[index];
     }
 };
 
+
 // Clase para la mochila digital que contiene los documentos del estudiante
 class DigitalBackpack {
 private:
-    DynamicArray documents;
+    DynamicArray<string> documents;
 
 public:
     void addDocument(const string& filename) {
@@ -149,121 +145,117 @@ Un profesor solo puede tener una clase y un estudiante solo puede estar asociado
 Los datos que se deben ver de sus alumnos son: Nombre, apellido y notas por asignatura. Los datos que se deben ver de la clase son: Número de inscritos, listado de estudiantes.
 */
 //PUNTEROS A TODO
+// Clase base User
 
-class Student {
-private:
+class User {
+protected:
     int id;
-    string firstName;
-    string lastName;
-    float* grades;
-    int gradeCount;
-    DigitalBackpack* backpack; // Mochila digital del estudiante
+    string name;
+    string surname;
 
 public:
-    // Constructor
-    Student(int id, string firstName, string lastName, float* Grades, int gradeCount) {
-        this->id = id;
-        this->firstName = firstName;
-        this->lastName = lastName;
-        this->gradeCount = gradeCount;
-        this->grades = new float[gradeCount]; // Inicializa el array de notas
-        for (int i = 0; i < gradeCount; i++) {
-            this->grades[i] = Grades[i]; // Copia las notas proporcionadas
-        }
-        backpack = new DigitalBackpack(); // Inicializamos la mochila
+    User(int id, const string& name, const string& surname)
+        : id(id), name(name), surname(surname) {}
+    int getId() const { return id; }
+    virtual void showInfo() const {
+        cout << "ID: " << id << ", Nombre: " << name << ", Apellido: " << surname << endl;
     }
 
-    // Destructor
-    ~Student() {
-        delete[] grades; // Libera el array de notas
-        delete backpack;
-    }
+    virtual ~User() {}
+};
 
-    // Getters
-    string getFirstName() const {
-        return firstName;
-    }
+class Student : public User {
+private:
+    DynamicArray<float> grades;
+    DigitalBackpack backpack; // Agregar la mochila digital en Student
 
-    string getLastName() const {
-        return lastName;
-    }
-
-    int getGradeCount() const {
-        return gradeCount;
-    }
-
-    // Metodo para asignar y acceder a las notas
-    void setGrade(int index, float grade) {
-        if (index >= 0 && index < gradeCount) {
-            grades[index] = grade;
+public:
+    // Constructor de Student modificado para aceptar notas iniciales
+    Student(int id, const string& name, const string& surname, const float* initialGrades = nullptr, size_t gradeCount = 0)
+        : User(id, name, surname) {
+        if (initialGrades != nullptr) {
+            for (size_t i = 0; i < gradeCount; ++i) {
+                grades.add(initialGrades[i]);
+            }
         }
     }
 
-    // Método para gestionar la mochila digital del estudiante
-    DigitalBackpack* getBackpack() const { return backpack; }
+    void addGrade(float grade) {
+        grades.add(grade);
+    }
 
-    // Metodo para mostrar las notas del estudiante
-    void displayGrades() const {
-        cout << "Notas de " << firstName << " " << lastName << ": ";
-        for (int i = 0; i < gradeCount; i++) {
+    void showGrades() const {
+        cout << "Grades for " << name << " " << surname << ": ";
+        for (size_t i = 0; i < grades.getSize(); i++) {
             cout << grades[i] << " ";
         }
         cout << endl;
     }
-};
 
-class Teacher {
+    void showInfo() const override {
+        User::showInfo();
+        showGrades();
+    }
+
+    DigitalBackpack* getBackpack() { // Método para acceder a la mochila
+        return &backpack;
+    }
+};
+// Teacher class adjusted with fixed constructor
+class Teacher : public User {
 private:
-    string name;
-    Student** students;
-    int capacity;
-    int studentCount;
+    DynamicArray<Student*> students;
+    int maxStudents;
 
 public:
-    // Constructor
-    Teacher(string name, int capacity) {
-        this->name = name;
-        this->students = new Student*[capacity]; // Almacén dinámico de estudiantes
-        this->capacity = capacity;
-        this->studentCount = 0;
-    }
+    Teacher(int id, const string& name, const string& surname, int maxStudents = 1)
+        : User(id, name, surname), maxStudents(maxStudents) {}
 
-    string getName() const {
-        return name;
-    }
-    int getStudentCount() const {
-        return studentCount;
-    }
-
-
-
-    // Destructor
-    ~Teacher() {
-        for (int i = 0; i < studentCount; i++) {
-            delete students[i]; // Libera la memoria de cada estudiante
-        }
-        delete[] students; // Libera el array de estudiantes
-    }
-
-    // Metodo para agregar estudiantes
     void addStudent(Student* student) {
-        if (studentCount < capacity) {
-            students[studentCount++] = student;
+        if (students.getSize() < maxStudents) {
+            students.add(student);
+            cout << "Estudiante añadido a la clase.\n";
         } else {
-            cout << "Capacidad máxima alcanzada\n";
+            cout << "El profesor ya tiene el número máximo de estudiantes asignados.\n";
         }
     }
 
-    // Metodo para listar estudiantes y sus notas
     void listStudents() const {
-        cout << "Estudiantes de " << name << ":\n";
-        for (int i = 0; i < studentCount; i++) {
-            cout << students[i]->getFirstName() << " " << students[i]->getLastName() << endl;
-            students[i]->displayGrades(); // Muestra las notas de cada estudiante
+        cout << "Estudiantes de " << name << " " << surname << ":\n";
+        for (size_t i = 0; i < students.getSize(); i++) {
+            students[i]->showInfo();
         }
     }
+    size_t getStudentCount() const {  // New method to return student count
+        return students.getSize();
+    }
+    void showInfo() const override {
+        User::showInfo();
+        cout << "Número de estudiantes: " << students.getSize() << endl;
+    }
+};
 
+class Admin : public User {
+public:
+    Admin(int id, const string& name, const string& surname)
+        : User(id, name, surname) {}
 
+    void addUser(User* user, DynamicArray<User*>& users) {
+        users.add(user);
+        cout << "Usuario agregado con ID: " << user->getId() << endl;
+    }
+
+    void removeUser(int id, DynamicArray<User*>& users) {
+        for (size_t i = 0; i < users.getSize(); i++) {
+            if (users[i]->getId() == id) {
+                delete users[i];
+                users.removeAt(i);
+                cout << "Usuario con ID: " << id << " eliminado.\n";
+                return;
+            }
+        }
+        cout << "Usuario con ID: " << id << " no encontrado.\n";
+    }
 };
 
 /*
@@ -601,7 +593,7 @@ void showMainMenu()
 
 void manageStudentsAndTeachers() {
      // Crear un profesor con capacidad máxima de 5 estudiantes (puedes cambiar el valor si es necesario)
-    Teacher teacher("Profesor Ejemplo", 5);
+    Teacher teacher(1,"Profesor","Ejemplo", 5);
     int option;
 
     while (true) {
@@ -642,10 +634,10 @@ void manageStudentsAndTeachers() {
             cout << "Estudiante añadido exitosamente.\n";
 
         } else if (option == 2) {
-            teacher.listStudents(); // Lista los estudiantes y sus notas
+            teacher.listStudents();
 
         } else if (option == 3) {
-            cout << "Número de inscritos: " << teacher.getStudentCount() << endl; // Muestra la cantidad de estudiantes asignados
+            cout << "Número de inscritos: " << teacher.getStudentCount() << endl;
 
         } else if (option == 0) {
             cout << "Volviendo al menú principal...\n";
@@ -688,7 +680,7 @@ void studentBackpackMenu(Student* student) {
     DigitalBackpack* backpack = student->getBackpack();
 
     while (true) {
-        cout << "\n--- MENÚ DE MOCHILA DIGITAL PARA " << student->getFirstName() << " ---\n";
+        cout << "\n--- MENÚ DE MOCHILA DIGITAL ---\n";
         cout << "1. Crear un nuevo documento\n";
         cout << "2. Añadir documento existente a la mochila\n";
         cout << "3. Eliminar documento de la mochila\n";
@@ -698,73 +690,117 @@ void studentBackpackMenu(Student* student) {
         cin >> option;
 
         switch (option) {
-        case 1:
-            createDocument();
-            break;
-        case 2:
-            cout << "Ingrese el nombre del archivo a agregar: ";
-            cin >> filename;
-            backpack->addDocument(filename);
-            break;
-        case 3:
-            cout << "Ingrese el nombre del archivo a eliminar: ";
-            cin >> filename;
-            backpack->removeDocument(filename);
-            break;
-        case 4:
-            backpack->viewDocuments();
-            break;
-        case 0:
-            cout << "Volviendo...\n";
-            return;
-        default:
+            case 1: {
+                cout << "Ingrese el nombre del nuevo archivo (con .txt): ";
+                cin >> filename;
+
+                ofstream file(filename);
+                if (!file) {
+                    cout << "Error al crear el archivo " << filename << ".\n";
+                    return;
+                }
+
+                cout << "Ingrese el contenido del archivo (escriba 'FIN' para terminar):\n";
+                string line;
+                cin.ignore();
+                while (true) {
+                    getline(cin, line);
+                    if (line == "FIN") break;
+                    file << line << endl;
+                }
+                file.close();
+                cout << "Archivo '" << filename << "' creado exitosamente.\n";
+                break;
+            }
+            case 2:
+                cout << "Ingrese el nombre del archivo a agregar: ";
+                cin >> filename;
+                backpack->addDocument(filename);
+                break;
+            case 3:
+                cout << "Ingrese el nombre del archivo a eliminar: ";
+                cin >> filename;
+                backpack->removeDocument(filename);
+                break;
+            case 4:
+                backpack->viewDocuments();
+                break;
+            case 0:
+                cout << "Volviendo...\n";
+                return;
+            default:
+                cout << "Opción no válida. Intente nuevamente.\n";
+        }
+    }
+}
+void userManagementSystem(DynamicArray<User*>& users, Admin& admin) {
+    int option;
+
+    while (true) {
+        cout << "\n--- SISTEMA DE GESTIÓN DE USUARIOS ---\n";
+        cout << "1. Añadir usuario\n2. Eliminar usuario\n3. Mostrar usuarios\n0. Volver\n";
+        cin >> option;
+
+        if (option == 0) break;
+        if (option == 1) {
+            int role, id = users.getSize() + 1;
+            string name, surname;
+            cout << "1. Estudiante\n2. Profesor\nSeleccione el rol: ";
+            cin >> role >> name >> surname;
+
+            if (role == 1) users.add(new Student(id, name, surname));
+            else if (role == 2) users.add(new Teacher(id, name, surname));
+            else cout << "Rol inválido.\n";
+
+        } else if (option == 2) {
+            int id;
+            cout << "ID del usuario a eliminar: ";
+            cin >> id;
+            admin.removeUser(id, users);
+        } else if (option == 3) {
+            for (size_t i = 0; i < users.getSize(); i++) users[i]->showInfo();
+        } else {
             cout << "Opción no válida. Intente nuevamente.\n";
         }
     }
 }
 
-void userManagementSystem() {
-    //poner aqui funcionalidades
-}
-
-
-// Función principal
+// ---- Función Principal Unificada ----
 int main() {
     AdvancedCalculator* calculator = new AdvancedCalculator();
+    Admin admin(1, "Admin", "Principal");
+    DynamicArray<User*> users;
+    users.add(&admin);
 
-    // Estudiante ejemplo
-    float grades[] = {85.5, 90.0, 78.3};
-    Student* student = new Student(1,"Juan", "Perez", grades, 3);
-
+    Student student(2, "Juan", "Perez");
     int choice;
+
     while (true) {
         showMainMenu();
         cin >> choice;
 
         switch (choice) {
-        case 1:
-            manageStudentsAndTeachers();
+            case 1:
+                manageStudentsAndTeachers();
             break;
-        case 2:
-            studentBackpackMenu(student);
-            delete student; // Limpiamos la memoria
+            case 2:
+                studentBackpackMenu(&student);
             break;
-        case 3:
-            calculatorMenu(calculator);
+            case 3:
+                calculatorMenu(calculator);
             break;
-        case 4:
-            userManagementSystem();
+            case 4:
+                userManagementSystem(users, admin);
             break;
-        case 5:
-            playGuessTheNumber();
+            case 5:
+                playGuessTheNumber();
             break;
-        case 6:
-            cout << "Saliendo del programa." << endl;
-            delete calculator;  //liberamos lamemoria del objeto calculator
+            case 6:
+                for (size_t i = 0; i < users.getSize(); i++) delete users[i];
+            cout << "Saliendo del programa.\n";
             return 0;
-        default:
-            cout << "Opción no válida. Intente nuevamente." << endl;
+            default:
+                cout << "Opción no válida. Intente nuevamente.\n";
         }
     }
 }
-
